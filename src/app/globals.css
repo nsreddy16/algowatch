@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface: 15 23 42;
+  --border: 51 65 85;
+  --muted: 148 163 184;
+  --accent: 99 102 241;
+  --accent-foreground: 255 255 255;
+}
+
+body {
+  @apply bg-slate-900 text-slate-100 antialiased;
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-slate-800/60 backdrop-blur-md border border-slate-700/50;
+  }
+}

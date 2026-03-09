@@ -1,0 +1,52 @@
+"use client";
+
+import type { Drama } from "@/lib/types";
+import { DramaCard } from "./DramaCard";
+
+type Props = {
+  drama: Drama;
+  results: Drama[];
+  onClose: () => void;
+};
+
+export function SimilarPanel({ drama, results, onClose }: Props) {
+  return (
+    <div className="w-80 shrink-0 glass rounded-xl p-4 flex flex-col max-h-[calc(100vh-8rem)]">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-white">Similar to &quot;{drama.title}&quot;</h3>
+        <button
+          onClick={onClose}
+          className="p-1 rounded text-slate-400 hover:bg-slate-700 hover:text-white"
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto space-y-3">
+        {results.length === 0 ? (
+          <p className="text-slate-400 text-sm">
+            No similar dramas found. Add embeddings to the catalog to enable similarity search.
+          </p>
+        ) : (
+          results.map((d) => (
+            <div key={d.id} className="flex gap-3">
+              <div className="w-16 shrink-0 aspect-[2/3] rounded bg-slate-800 overflow-hidden">
+                {d.image_url ? (
+                  <img src={d.image_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">—</div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-white truncate">{d.title}</p>
+                <p className="text-slate-400 text-xs">
+                  {d.year} · {d.rating ?? "—"}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

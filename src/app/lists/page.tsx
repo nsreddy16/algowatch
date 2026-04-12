@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { unstable_noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { ListsClient } from "./ListsClient";
 
 export default async function ListsPage() {
+  unstable_noStore();
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

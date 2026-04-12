@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { unstable_noStore } from "next/cache";
 import { UmapExplorer } from "./UmapExplorer";
 
 export default async function ExplorePage() {
+  unstable_noStore();
   let points: { id: number; title: string; rating: number | null; media_type: string; umap_x: number; umap_y: number }[] = [];
   try {
     const supabase = await createClient();

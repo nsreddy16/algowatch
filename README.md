@@ -25,8 +25,13 @@ Media recommendation app for Asian dramas (and later anime), with ranked lists, 
 
 ## Deploy (Vercel)
 
-- Connect the repo to Vercel and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in project environment variables.
-- Build command: `npm run build` (default). No extra config needed for Next.js.
+1. Push the repo to GitHub (or GitLab/Bitbucket).
+2. Go to [vercel.com](https://vercel.com) → **Add New** → **Project** and import the repo.
+3. In **Environment Variables**, add:
+   - `NEXT_PUBLIC_SUPABASE_URL` = your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase anon (publishable) key
+4. Click **Deploy**. Vercel will run `npm run build` by default; no extra config needed.
+5. Optional: add a custom domain under **Settings** → **Domains**.
 
 ## Docs
 

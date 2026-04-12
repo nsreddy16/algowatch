@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { unstable_noStore } from "next/cache";
 import { redirect, notFound } from "next/navigation";
 import { ListDetailClient } from "./ListDetailClient";
 
@@ -23,6 +24,7 @@ type ListItemWithDrama = {
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function ListDetailPage({ params }: Props) {
+  unstable_noStore();
   const { slug } = await params;
   try {
     const supabase = await createClient();

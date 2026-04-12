@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import type { Drama } from "@/lib/types";
-import { DramaCard } from "./DramaCard";
 
 type Props = {
   drama: Drama;
@@ -12,18 +11,21 @@ type Props = {
 
 export function SimilarPanel({ drama, results, onClose }: Props) {
   return (
-    <div className="w-80 shrink-0 glass rounded-xl p-4 flex flex-col max-h-[calc(100vh-8rem)]">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-white">Similar to &quot;{drama.title}&quot;</h3>
+    <div className="glass rounded-xl p-4 flex flex-col border border-slate-600/60 shadow-xl max-h-[min(32rem,calc(100vh-6rem))]">
+      <div className="flex items-center justify-between gap-2 mb-4 shrink-0">
+        <h3 className="font-semibold text-white text-sm leading-snug">
+          Similar to &quot;{drama.title}&quot;
+        </h3>
         <button
+          type="button"
           onClick={onClose}
-          className="p-1 rounded text-slate-400 hover:bg-slate-700 hover:text-white"
+          className="p-1.5 rounded shrink-0 text-slate-400 hover:bg-slate-700 hover:text-white"
           aria-label="Close"
         >
           ×
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
         {results.length === 0 ? (
           <p className="text-slate-400 text-sm">
             No similar dramas found. Add embeddings to the catalog to enable similarity search.

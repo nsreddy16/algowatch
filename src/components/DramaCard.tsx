@@ -5,12 +5,25 @@ import type { Drama } from "@/lib/types";
 
 type Props = {
   drama: Drama;
-  onFindSimilar: () => void;
+  onOpenDetail: (drama: Drama) => void;
+  onFindSimilar: (drama: Drama) => void;
 };
 
-export function DramaCard({ drama, onFindSimilar }: Props) {
+export function DramaCard({ drama, onOpenDetail, onFindSimilar }: Props) {
   return (
-    <div className="group rounded-xl glass overflow-hidden hover:ring-2 hover:ring-indigo-500/50 transition-all">
+    <div
+      data-drama-card
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenDetail(drama)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpenDetail(drama);
+        }
+      }}
+      className="group rounded-xl glass overflow-hidden hover:ring-2 hover:ring-indigo-500/50 transition-all cursor-pointer text-left"
+    >
       <div className="aspect-[2/3] bg-slate-800 relative">
         {drama.image_url ? (
           <Image
@@ -27,7 +40,11 @@ export function DramaCard({ drama, onFindSimilar }: Props) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-end p-2 gap-2">
           <button
-            onClick={onFindSimilar}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onFindSimilar(drama);
+            }}
             className="px-2 py-1 rounded text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-500"
           >
             Find similar

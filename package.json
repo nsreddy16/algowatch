@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "ingest": "node scripts/ingest-dramas.mjs"
+    "ingest": "node scripts/ingest-dramas.mjs",
+    "update-drama-images": "node scripts/update-drama-images.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

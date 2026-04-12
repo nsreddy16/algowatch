@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { Drama } from "@/lib/types";
 import { DramaCard } from "./DramaCard";
 
@@ -30,9 +31,15 @@ export function SimilarPanel({ drama, results, onClose }: Props) {
         ) : (
           results.map((d) => (
             <div key={d.id} className="flex gap-3">
-              <div className="w-16 shrink-0 aspect-[2/3] rounded bg-slate-800 overflow-hidden">
+              <div className="relative w-16 shrink-0 aspect-[2/3] rounded bg-slate-800 overflow-hidden">
                 {d.image_url ? (
-                  <img src={d.image_url} alt="" className="w-full h-full object-cover" />
+                  <Image
+                    src={d.image_url}
+                    alt={d.title}
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">—</div>
                 )}

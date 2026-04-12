@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   DndContext,
@@ -85,12 +86,14 @@ function SortableRow({
           ⋮⋮
         </button>
       )}
-      <div className="w-12 h-18 shrink-0 rounded bg-slate-800 overflow-hidden">
+      <div className="relative w-12 h-[4.5rem] shrink-0 rounded bg-slate-800 overflow-hidden">
         {item.drama?.image_url ? (
-          <img
+          <Image
             src={item.drama.image_url}
-            alt=""
-            className="w-full h-full object-cover"
+            alt={item.drama.title}
+            fill
+            className="object-cover"
+            sizes="48px"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-500 text-xs">
@@ -321,9 +324,15 @@ function AddDramaModal({
               key={d.id}
               className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50"
             >
-              <div className="w-10 h-14 rounded bg-slate-700 overflow-hidden shrink-0">
+              <div className="relative w-10 h-14 rounded bg-slate-700 overflow-hidden shrink-0">
                 {d.image_url ? (
-                  <img src={d.image_url} alt="" className="w-full h-full object-cover" />
+                  <Image
+                    src={d.image_url}
+                    alt={d.title}
+                    fill
+                    className="object-cover"
+                    sizes="40px"
+                  />
                 ) : null}
               </div>
               <div className="min-w-0 flex-1">

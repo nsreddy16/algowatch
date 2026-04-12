@@ -23,6 +23,20 @@ node scripts/ingest-dramas.mjs
 
 ---
 
+## update-drama-images.mjs
+
+Updates existing `public.dramas` rows with poster URLs from `mydramalist_kdramas_v2.json`, matching on `link` (does not insert new rows). Uses the REST API only—no SQL migration required.
+
+**Run**
+
+```bash
+npm run update-drama-images
+```
+
+Optional: `00003_apply_drama_image_batch.sql` adds an RPC for bulk updates if you prefer a single SQL function on very large catalogs.
+
+---
+
 ## ingest_dramas.py (JSON + .npy embeddings/UMAP)
 
 Imports dramas from the JSON and, if present, attaches embeddings and UMAP from NumPy files:

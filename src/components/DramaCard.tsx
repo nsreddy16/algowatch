@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { Drama } from "@/lib/types";
 
 type Props = {
@@ -12,10 +13,12 @@ export function DramaCard({ drama, onFindSimilar }: Props) {
     <div className="group rounded-xl glass overflow-hidden hover:ring-2 hover:ring-indigo-500/50 transition-all">
       <div className="aspect-[2/3] bg-slate-800 relative">
         {drama.image_url ? (
-          <img
+          <Image
             src={drama.image_url}
-            alt=""
-            className="w-full h-full object-cover"
+            alt={drama.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-500 text-sm">

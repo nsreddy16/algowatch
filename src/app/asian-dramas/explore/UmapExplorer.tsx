@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
 import type { Drama } from "@/lib/types";
 import { ASIAN_CATALOG } from "@/lib/catalog";
 import {
@@ -10,6 +9,7 @@ import {
   regionColor,
   orderedRegionsPresent,
 } from "@/lib/mediaTypeRegion";
+import { DramaDetailModal } from "@/components/DramaDetailModal";
 
 type DramaPoint = {
   id: number;
@@ -30,7 +30,21 @@ export function UmapExplorer({ initialPoints }: Props) {
   const [hoverId, setHoverId] = useState<number | null>(null);
   const [recs, setRecs] = useState<Drama[]>([]);
   const [showArrows, setShowArrows] = useState(true);
+  const [detailDrama, setDetailDrama] = useState<Drama | null>(null);
   const supabase = createClient();
+
+  async function openDramaDetail(dramaId: number) {
+    const { data } = await supabase
+      .from("dramas")
+      .select(
+        "id,title,original_title,media_type,year,num_episodes,rating,description,image_url,link,genres,tags,main_actors,umap_x,umap_y"
+      )
+      .eq("id", dramaId)
+      .maybeSingle();
+    if (data) {
+      setDetailDrama(data as Drama);
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -39,7 +53,16 @@ export function UmapExplorer({ initialPoints }: Props) {
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: pos } = await supabase.rpc("get_user_umap_position");
+      const [posResp, rankedResp] = await Promise.all([
+        supabase.rpc("get_user_umap_position"),
+        supabase
+          .from("user_ranked_dramas")
+          .select("drama_id")
+          .eq("user_id", user.id)
+          .eq("catalog", ASIAN_CATALOG),
+      ]);
+
+      const pos = posResp.data;
       if (pos?.[0] && pos[0].umap_x != null && pos[0].umap_y != null) {
         setUserPoint({
           x: Number(pos[0].umap_x) ?? 0,
@@ -47,22 +70,21 @@ export function UmapExplorer({ initialPoints }: Props) {
         });
       }
 
-      const { data: ranked } = await supabase
-        .from("user_ranked_dramas")
-        .select("drama_id")
-        .eq("user_id", user.id)
-        .eq("catalog", ASIAN_CATALOG);
-      setHighlightIds(new Set((ranked ?? []).map((r) => r.drama_id)));
+      setHighlightIds(new Set((rankedResp.data ?? []).map((r) => r.drama_id)));
+    })();
+  }, [supabase]);
 
-      const r = await fetch("/api/recommendations/user");
-      if (r.ok) {
-        const data = await r.json();
-        setRecs(Array.isArray(data) ? data.slice(0, REC_ARROW_LIMIT) : []);
+  useEffect(() => {
+    (async () => {
+      const recResp = await fetch(`/api/recommendations/user?limit=${REC_ARROW_LIMIT}`).catch(() => null);
+      if (recResp?.ok) {
+        const data = await recResp.json();
+        setRecs(Array.isArray(data) ? data : []);
       } else {
         setRecs([]);
       }
     })();
-  }, [supabase]);
+  }, []);
 
   const points = useMemo(
     () => initialPoints.filter((p) => p.umap_x != null && p.umap_y != null),
@@ -120,6 +142,7 @@ export function UmapExplorer({ initialPoints }: Props) {
   }
 
   return (
+    <>
     <div className="glass rounded-xl overflow-hidden">
       <div className="px-4 py-2 border-b border-slate-700 flex flex-wrap items-center gap-4 text-sm">
         <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
@@ -142,7 +165,7 @@ export function UmapExplorer({ initialPoints }: Props) {
             refY="3.5"
             orient="auto"
           >
-            <polygon points="0 0, 10 3.5, 0 7" fill="rgba(52, 211, 153, 0.85)" />
+            <polygon points="0 0, 10 3.5, 0 7" fill="rgba(239, 68, 68, 0.95)" />
           </marker>
         </defs>
         {recArrows.map((a) => (
@@ -152,7 +175,7 @@ export function UmapExplorer({ initialPoints }: Props) {
             y1={a.uy}
             x2={a.x2}
             y2={a.y2}
-            stroke="rgba(52, 211, 153, 0.55)"
+            stroke="rgba(239, 68, 68, 0.75)"
             strokeWidth={1.5}
             markerEnd="url(#arrowhead)"
           />
@@ -165,7 +188,7 @@ export function UmapExplorer({ initialPoints }: Props) {
           const region = mediaTypeRegion(p.media_type);
           const fill = regionColor(region);
           return (
-            <Link key={p.id} href={`/asian-dramas?drama=${p.id}`}>
+            <g key={p.id}>
               <circle
                 cx={x}
                 cy={y}
@@ -176,13 +199,15 @@ export function UmapExplorer({ initialPoints }: Props) {
                 strokeWidth={2}
                 onMouseEnter={() => setHoverId(p.id)}
                 onMouseLeave={() => setHoverId(null)}
+                onClick={() => void openDramaDetail(p.id)}
+                className="cursor-pointer"
               />
               {isHover && (
                 <text x={x} y={y - 12} textAnchor="middle" fill="#e2e8f0" fontSize={12}>
                   {p.title}
                 </text>
               )}
-            </Link>
+            </g>
           );
         })}
         {userPoint && (
@@ -192,14 +217,14 @@ export function UmapExplorer({ initialPoints }: Props) {
               cy={scaleY(userPoint.y)}
               r={10}
               fill="none"
-              stroke="#22c55e"
+              stroke="#ef4444"
               strokeWidth={3}
             />
             <text
               x={scaleX(userPoint.x)}
               y={scaleY(userPoint.y) - 16}
               textAnchor="middle"
-              fill="#22c55e"
+              fill="#ef4444"
               fontSize={11}
             >
               You
@@ -226,16 +251,18 @@ export function UmapExplorer({ initialPoints }: Props) {
           </span>
           {userPoint && (
             <span className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full border-2 border-emerald-500 bg-transparent" /> You (weighted taste)
+              <span className="w-3 h-3 rounded-full border-2 border-red-500 bg-transparent" /> You (weighted taste)
             </span>
           )}
           {showArrows && recArrows.length > 0 && (
             <span className="flex items-center gap-2">
-              <span className="w-8 h-0.5 bg-emerald-400/80 rounded" /> Suggested next
+              <span className="w-8 h-0.5 bg-red-500 rounded" /> Suggested next
             </span>
           )}
         </div>
       </div>
     </div>
+    {detailDrama && <DramaDetailModal drama={detailDrama} onClose={() => setDetailDrama(null)} />}
+    </>
   );
 }

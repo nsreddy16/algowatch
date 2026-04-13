@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -243,17 +243,33 @@ function AddDramaModal({
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
-  async function search() {
-    if (!query.trim()) return;
+  const performSearch = useCallback(async (term: string) => {
+    const q = term.trim();
+    if (!q) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data } = await supabase
       .from("dramas")
       .select("id, title, year, num_episodes, rating, image_url, genres, media_type")
-      .ilike("title", `%${query.trim()}%`)
+      .ilike("title", `%${q}%`)
       .limit(20);
     setResults((data as RankRow["drama"][]) ?? []);
     setLoading(false);
+  }, [supabase]);
+
+  async function search(term?: string) {
+    await performSearch(term ?? query);
   }
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      void performSearch(query);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [query, performSearch]);
 
   async function addDrama(drama: RankRow["drama"]) {
     const {
@@ -317,42 +333,50 @@ function AddDramaModal({
             placeholder="Search by title..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && search()}
+            onKeyDown={(e) => e.key === "Enter" && void search()}
             className="flex-1 px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white"
           />
           <button
             type="button"
-            onClick={search}
+            onClick={() => void search()}
             disabled={loading}
             className="px-4 py-2 rounded-lg bg-indigo-600 text-white disabled:opacity-50"
           >
             Search
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto space-y-2">
-          {results.map((d) => (
-            <div key={d.id} className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50">
-              <div className="relative w-10 h-14 rounded bg-slate-700 overflow-hidden shrink-0">
-                {d.image_url ? (
-                  <Image src={d.image_url} alt={d.title} fill className="object-cover" sizes="40px" />
-                ) : null}
+        <div className="h-80 overflow-y-auto space-y-2 pr-1">
+          {loading ? (
+            <p className="text-sm text-slate-400 py-3">Searching…</p>
+          ) : query.trim().length === 0 ? (
+            <p className="text-sm text-slate-500 py-3">Start typing to search dramas.</p>
+          ) : results.length === 0 ? (
+            <p className="text-sm text-slate-500 py-3">No dramas found.</p>
+          ) : (
+            results.map((d) => (
+              <div key={d.id} className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50">
+                <div className="relative w-10 h-14 rounded bg-slate-700 overflow-hidden shrink-0">
+                  {d.image_url ? (
+                    <Image src={d.image_url} alt={d.title} fill className="object-cover" sizes="40px" />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-white truncate">{d.title}</p>
+                  <p className="text-slate-400 text-xs">
+                    {d.year} · {d.rating}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => addDrama(d)}
+                  disabled={existingIds.includes(d.id)}
+                  className="px-3 py-1 rounded bg-indigo-600 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {existingIds.includes(d.id) ? "Added" : "Add"}
+                </button>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-white truncate">{d.title}</p>
-                <p className="text-slate-400 text-xs">
-                  {d.year} · {d.rating}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => addDrama(d)}
-                disabled={existingIds.includes(d.id)}
-                className="px-3 py-1 rounded bg-indigo-600 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {existingIds.includes(d.id) ? "Added" : "Add"}
-              </button>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

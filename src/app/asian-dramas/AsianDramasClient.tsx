@@ -194,7 +194,9 @@ export function AsianDramasClient() {
                   ))}
                 </div>
               ) : (
-                <p className="text-slate-500 text-sm">Add dramas to your lists to get personalized recommendations.</p>
+                <p className="text-slate-500 text-sm">
+                  Rank dramas you’ve watched on My rankings to get personalized recommendations.
+                </p>
               )}
             </section>
           )}
@@ -253,6 +255,7 @@ export function AsianDramasClient() {
               <SimilarPanel
                 drama={similarTo}
                 results={similarResults ?? []}
+                onOpenDetail={setDetailDrama}
                 onClose={() => {
                   setSimilarTo(null);
                   setSimilarResults(null);

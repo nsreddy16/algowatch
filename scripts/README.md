@@ -2,58 +2,54 @@
 
 ## Env vars
 
-Both ingest scripts read **`.env` and `.env.local`** from the project root (Node script loads them automatically; Python script does the same). Use:
+Ingest reads **`.env` and `.env.local`** from the project root. Required:
 
-- `NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_URL` – Supabase project URL
-- `SUPABASE_SERVICE_ROLE_KEY` – service role key (required for ingest; not the anon/publishable key)
+- `NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY` (not the anon key)
 
-Run from project root so the scripts find the env files.
+Optional:
+
+- `EMBED_DIM` — embedding width (default `384`). Must match `dramas.embedding` and `drama_embeddings.npy` columns.
+
+Run commands from the **project root** so env files resolve.
 
 ---
 
-## ingest-dramas.mjs (JSON only)
+## Ingest (single command)
 
-Imports `mydramalist_kdramas_v2.json` into Supabase `public.dramas`. No embeddings/UMAP unless they are inside the JSON.
+**One workflow** loads `mydramalist_kdramas_v2.json` and, if the files exist beside it, also loads:
 
-**Run**
+- `drama_embeddings.npy` — shape `(N, D)` with `N` = JSON length and `D` = `EMBED_DIM`
+- `drama_embeddings_2d.npy` — shape `(N, 2)` for `umap_x` / `umap_y`
+
+Row order in the `.npy` files must match the JSON array order (same as the old Python script).
 
 ```bash
-node scripts/ingest-dramas.mjs
+npm run ingest
 ```
+
+This runs `scripts/ingest-all.mjs` (Node + `npyjs`). No separate Python step.
+
+After a large load with embeddings, run in the Supabase SQL Editor:
+
+```sql
+analyze public.dramas;
+```
+
+Vector indexes come from migrations (e.g. `00002_dramas_vector_index.sql`) when you `supabase db push`; apply migrations **before** ingest.
+
+---
+
+## Legacy Python script
+
+`ingest_dramas.py` is deprecated in favor of `npm run ingest`. Keep it only if you need a standalone Python environment without Node dependencies.
 
 ---
 
 ## update-drama-images.mjs
 
-Updates existing `public.dramas` rows with poster URLs from `mydramalist_kdramas_v2.json`, matching on `link` (does not insert new rows). Uses the REST API only—no SQL migration required.
-
-**Run**
+Updates existing `public.dramas` poster URLs from `mydramalist_kdramas_v2.json` (match on `link`).
 
 ```bash
 npm run update-drama-images
 ```
-
-Optional: `00003_apply_drama_image_batch.sql` adds an RPC for bulk updates if you prefer a single SQL function on very large catalogs.
-
----
-
-## ingest_dramas.py (JSON + .npy embeddings/UMAP)
-
-Imports dramas from the JSON and, if present, attaches embeddings and UMAP from NumPy files:
-
-- `mydramalist_kdramas_v2.json` – drama metadata (required)
-- `drama_embeddings.npy` – shape `(N, D)`; row `i` = drama `i` in the JSON
-- `drama_embeddings_2d.npy` – shape `(N, 2)` for `umap_x`, `umap_y`
-
-**Prerequisites**
-
-- Supabase migration `00001_initial_schema.sql` applied.
-- `dramas.embedding` is `vector(384)` by default. If your `.npy` has another dimension, set `EMBED_DIM=768` (or the right value) in `.env` and alter the column in Supabase to match.
-
-**Run (from project root)**
-
-```bash
-python scripts/ingest_dramas.py
-```
-
-Uses the same env as above. After loading, run `00002_dramas_vector_index.sql` in Supabase for similarity search.

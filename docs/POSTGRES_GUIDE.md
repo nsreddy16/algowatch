@@ -16,7 +16,7 @@ create extension if not exists pg_trgm;
 
 ## 2. Schema
 
-See [supabase/migrations/00001_initial_schema.sql](../supabase/migrations/00001_initial_schema.sql) for the full schema: `dramas`, `profiles`, `lists`, `list_items`, `user_ratings`, indexes, RLS, and RPCs.
+See [supabase/migrations/00001_initial_schema.sql](../supabase/migrations/00001_initial_schema.sql) for the full schema: `dramas`, `profiles`, `user_ranked_dramas`, `user_ratings`, indexes, RLS, and RPCs.
 
 - **dramas**: catalog with `embedding vector(384)`, `umap_x`, `umap_y` (nullable until you add embeddings).
 - **Vector index**: run [00002_dramas_vector_index.sql](../supabase/migrations/00002_dramas_vector_index.sql) after loading dramas with embeddings.
@@ -34,14 +34,13 @@ See [supabase/migrations/00001_initial_schema.sql](../supabase/migrations/00001_
 ## 4. RPCs
 
 - `get_similar_dramas(p_target_drama_id, p_limit)`: nearest neighbors by embedding.
-- `get_user_recommendations(p_limit)`: recommendations from average of user list embeddings.
-- `get_user_umap_position()`: returns user’s average `(umap_x, umap_y)` from their list.
+- `get_user_recommendations(p_limit)`: recommendations from weighted taste embedding (ranked dramas).
+- `get_user_umap_position()`: returns cached taste `(umap_x, umap_y)` on `profiles`.
 
 ---
 
 ## 5. Setup order
 
-1. Run `00001_initial_schema.sql` in Supabase.
-2. Run the ingest script: `node scripts/ingest-dramas.mjs` (set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`).
-3. If you added embeddings, run `00002_dramas_vector_index.sql`.
-4. Run `analyze public.dramas;` after bulk load.
+1. Apply migrations (`supabase db push` or run SQL files in order).
+2. Ingest data: `npm run ingest` with `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env` / `.env.local` (optional `drama_embeddings.npy` + `drama_embeddings_2d.npy` beside the JSON).
+3. After bulk load with embeddings, run `analyze public.dramas;` in the SQL editor.

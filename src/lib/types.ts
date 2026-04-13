@@ -18,20 +18,11 @@ export type Drama = {
   updated_at?: string;
 };
 
-export type List = {
+/** User's ranked dramas for a catalog (e.g. asian). */
+export type UserRankedDrama = {
   id: string;
   user_id: string;
-  name: string;
-  description: string | null;
-  is_public: boolean;
-  share_slug: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type ListItem = {
-  id: string;
-  list_id: string;
+  catalog: string;
   drama_id: number;
   rank: number;
   notes: string | null;

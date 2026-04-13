@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-One-time import: mydramalist_kdramas_v2.json + drama_embeddings.npy + drama_embeddings_2d.npy
--> Supabase public.dramas (with embedding and umap_x, umap_y).
+Deprecated: use `npm run ingest` (scripts/ingest-all.mjs) for a single Node-based workflow.
 
-Requires: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env or .env.local.
-Run from project root: python scripts/ingest_dramas.py
+This file is kept for reference or environments that cannot run Node; behavior matches
+ingest-all.mjs (JSON + optional .npy files).
 """
 
 import json

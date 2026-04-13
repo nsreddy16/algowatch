@@ -25,7 +25,7 @@ export function Nav() {
     { href: "/", label: "Home" },
     { href: "/asian-dramas", label: "Asian Dramas" },
     { href: "/anime", label: "Anime" },
-    ...(user ? [{ href: "/lists", label: "My Lists" }] : []),
+    ...(user ? [{ href: "/lists", label: "My rankings" }] : []),
   ];
 
   return (

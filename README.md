@@ -15,8 +15,9 @@ Media recommendation app for Asian dramas (and later anime), with ranked lists, 
    - Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and optionally `SUPABASE_SERVICE_ROLE_KEY` for the ingest script.
 
 3. **Data**
-   - Run `npm run ingest` to import `mydramalist_kdramas_v2.json` into `dramas`.
-   - If you add embeddings and UMAP coordinates to the data, run `supabase/migrations/00002_dramas_vector_index.sql` and `analyze public.dramas;`.
+   - Apply migrations first (`supabase db push` or run the SQL in `supabase/migrations/`).
+   - Run **`npm run ingest`** once to import `mydramalist_kdramas_v2.json` into `dramas`. Optional: place `drama_embeddings.npy` and `drama_embeddings_2d.npy` next to the JSON (same row order) to load vectors and UMAP in the same run.
+   - After ingest with embeddings, run `analyze public.dramas;` in the SQL Editor (indexes are already created by migration `00002`).
 
 4. **Run**
    - `npm install && npm run dev` — app at [http://localhost:3000](http://localhost:3000).

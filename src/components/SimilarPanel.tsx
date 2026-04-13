@@ -7,9 +7,10 @@ type Props = {
   drama: Drama;
   results: Drama[];
   onClose: () => void;
+  onOpenDetail: (drama: Drama) => void;
 };
 
-export function SimilarPanel({ drama, results, onClose }: Props) {
+export function SimilarPanel({ drama, results, onClose, onOpenDetail }: Props) {
   return (
     <div className="glass rounded-xl p-4 flex flex-col border border-slate-600/60 shadow-xl max-h-[min(32rem,calc(100vh-6rem))]">
       <div className="flex items-center justify-between gap-2 mb-4 shrink-0">
@@ -32,7 +33,12 @@ export function SimilarPanel({ drama, results, onClose }: Props) {
           </p>
         ) : (
           results.map((d) => (
-            <div key={d.id} className="flex gap-3">
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => onOpenDetail(d)}
+              className="flex gap-3 w-full text-left rounded-lg p-1 -m-1 hover:bg-slate-700/50 transition-colors"
+            >
               <div className="relative w-16 shrink-0 aspect-[2/3] rounded bg-slate-800 overflow-hidden">
                 {d.image_url ? (
                   <Image
@@ -52,7 +58,7 @@ export function SimilarPanel({ drama, results, onClose }: Props) {
                   {d.year} · {d.rating ?? "—"}
                 </p>
               </div>
-            </div>
+            </button>
           ))
         )}
       </div>

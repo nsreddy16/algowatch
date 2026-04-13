@@ -21,7 +21,8 @@ export default async function ExplorePage() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-white mb-2">Explore by taste</h1>
       <p className="text-slate-400 mb-6">
-        Each point is a drama in 2D UMAP space. Your position is the average of your list.
+        Each point is a drama in 2D UMAP space (colors follow media type, e.g. Korean vs Chinese). Your position is a
+        rank-weighted blend of titles on My rankings. Arrows point toward suggested next watches. This algorithm and display is still a work in progress.
       </p>
       <UmapExplorer initialPoints={points} />
     </div>
